@@ -33,7 +33,7 @@ def getItem(param):
     except:
         pass
     if type(param) == int:
-        fields = ['id', 'price']
+        fields = ['id']
     elif type(param) == str:
         fields = ['name']
     else:
