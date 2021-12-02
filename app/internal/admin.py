@@ -1,7 +1,5 @@
 from internal.types import Item
-import sqlalchemy as db
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, insert, select
-
+from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, insert, select, delete
 
 engine = create_engine("sqlite:///stock.db", echo=True)
 global conn, items
@@ -17,15 +15,47 @@ items = Table('items', meta,
 meta.create_all(engine)
 
 
+class db:
+    def checkId(idNum: int):
+        query = select(items).where(items.c.id == idNum)
+        res = conn.execute(query)
+        if len(res.fetchall()) == 0:
+          return False
+        else:
+            return True
+
+    def getMaxId() -> int:
+        query = select(items)
+        res = conn.execute(query)
+        return len(res.fetchall()) + 1
+
+
+
 def addItem(item: Item):
+    for i in range(1, db.getMaxId()):
+        if db.checkId(i) == False:
+            query = insert(items).values(id=i, name=item.name, price=item.price, description=item.description)
+            try:
+                res = conn.execute(query)
+                return (item, "200 OK")
+            except:
+                pass
+        else:
+            pass
     query = insert(items).values(name=item.name, price=item.price, description=item.description)
-    res = conn.execute(query)
-    return item
+    try:
+        res = conn.execute(query)
+        return (item, "200 OK")
+    except:
+        pass
 
 def getItems():
     query = select(items)
-    res = conn.execute(query)
-    return res.fetchall()
+    try:
+        res = conn.execute(query)
+        return res.fetchall()
+    except:
+        pass
 
 def getItem(param):
     try:
@@ -46,4 +76,11 @@ def getItem(param):
             return res.fetchall()
         except:
             pass
-    
+
+def deleteItem(idNum: int):
+    query = delete(items).where(items.c.id == idNum)
+    try:
+        res = conn.execute(query)
+        return "200 OK"
+    except:
+        pass
