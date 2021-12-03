@@ -7,8 +7,8 @@
 - [x] Get item or items by name or id
 - [x] Delete items
 - [x] Use old IDs with new items
-- [ ] Add quantity field
-- [ ] Improve error handling
+- [x] Add quantity field
+- [ ] Edit items
 
 
 
