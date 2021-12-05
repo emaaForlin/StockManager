@@ -8,7 +8,7 @@
 - [x] Delete items
 - [x] Use old IDs with new items
 - [x] Add quantity field
-- [ ] Edit items
+- [x] Edit items
 
 
 
