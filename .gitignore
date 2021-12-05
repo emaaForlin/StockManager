@@ -1,4 +1,5 @@
-.vscode/*
+.vscode/
+.devcontainer/
 **/__pycache__
 **/*.pyc
 **/*.db

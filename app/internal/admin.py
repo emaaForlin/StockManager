@@ -1,6 +1,6 @@
-from sqlalchemy.sql.elements import Null
-from internal.types import Item
-from sqlalchemy import create_engine, Table, Column, Integer, String, Float, MetaData, insert, select, delete
+from internal.types import Item, EditedItem
+
+from sqlalchemy import create_engine, Table, Column, Integer, String, Float, MetaData, insert, select, delete, update
 
 engine = create_engine("sqlite:///stock.db", echo=True)
 global conn, items
@@ -23,8 +23,6 @@ class db:
         res = conn.execute(query)
         if len(res.fetchall()) == 0:
           return False
-        else:
-            return True
 
     def getMaxId() -> int:
         query = select(items)
@@ -40,7 +38,7 @@ def addItem(item: Item):
                 res = conn.execute(query)
                 return (item, "200 OK")
             except:
-                pass
+                return
         else:
             pass
     query = insert(items).values(name=item.name, price=item.price, quantity=item.quantity, description=item.description)
@@ -56,9 +54,9 @@ def getItems():
         res = conn.execute(query)
         return res.fetchall()
     except:
-        pass
+        return
 
-def getItem(param):
+def getItem(param) -> Item: 
     try:
         param = int(param)
     except:
@@ -70,15 +68,16 @@ def getItem(param):
     elif type(param) == str:
         field = 'name'
         query = select(items).where(items.c[field] == param or items.c[field] == param.upper() or items.c[field] == param.lower() or items.c[field] == param.capitalize())
-
-    else:
-        pass
     
     try:
-        res = conn.execute(query)
-        return res.fetchall()
+        raw = conn.execute(query)
+        raw = raw.fetchall()
+    
+        res = Item(id = raw[0][0], name = raw[0][1], price = raw[0][2], quantity = raw[0][3], description = raw[0][4])
+        
+        return res
     except:
-        pass
+        return "Error getting this item"
 
 def deleteItem(idNum: int):
     query = delete(items).where(items.c.id == idNum)
@@ -86,4 +85,23 @@ def deleteItem(idNum: int):
         res = conn.execute(query)
         return "200 OK"
     except:
-        pass
+        return
+
+def updateItem(idNum: int, newItem: EditedItem):
+    oldItem = getItem(idNum)
+
+    if newItem.name in ("", None):
+        newItem.name = oldItem.name
+    if not newItem.price:
+        newItem.price = oldItem.price
+    if not newItem.quantity:
+        newItem.quantity = oldItem.quantity
+    if newItem.description in ("", None):
+        newItem.description = oldItem.description
+
+    
+    
+    query = update(items).where(items.c.id == idNum).values(id=idNum, name = newItem.name, price = newItem.price, quantity = newItem.quantity, description = newItem.description)
+    res = conn.execute(query)
+    
+    return "200 OK"
