@@ -1,9 +1,9 @@
 from internal.types import Item, EditedItem
-
 from sqlalchemy import create_engine, Table, Column, Integer, String, Float, MetaData, insert, select, delete, update
+from sqlalchemy import orm
 
 engine = create_engine("sqlite:///stock.db", echo=True)
-global conn, items
+global conn, dbEngine
 
 conn = engine.connect()
 meta = MetaData()
@@ -29,7 +29,6 @@ class db:
         res = conn.execute(query)
         return len(res.fetchall()) + 1
 
-
 def addItem(item: Item):
     for i in range(1, db.getMaxId()):
         if db.checkId(i) == False:
@@ -44,9 +43,9 @@ def addItem(item: Item):
     query = insert(items).values(name=item.name, price=item.price, quantity=item.quantity, description=item.description)
     try:
         res = conn.execute(query)
-        return (item, "200 OK")
+        return item
     except:
-        return 
+        return False
 
 def getItems():
     query = select(items)
@@ -54,13 +53,13 @@ def getItems():
         res = conn.execute(query)
         return res.fetchall()
     except:
-        return
+        return False
 
 def getItem(param) -> Item: 
     try:
         param = int(param)
     except:
-        pass
+        param = param
 
     if type(param) == int:
         field = 'id'
@@ -72,36 +71,35 @@ def getItem(param) -> Item:
     try:
         raw = conn.execute(query)
         raw = raw.fetchall()
-    
         res = Item(id = raw[0][0], name = raw[0][1], price = raw[0][2], quantity = raw[0][3], description = raw[0][4])
-        
         return res
     except:
-        return "Error getting this item"
+        return False
 
 def deleteItem(idNum: int):
-    query = delete(items).where(items.c.id == idNum)
-    try:
+    if getItem(idNum):
+        query = delete(items).where(items.c.id == idNum)
         res = conn.execute(query)
-        return "200 OK"
-    except:
-        return
+        print("AAAAAAAAAAAAAAAAAA", getItem(idNum))
+        return res
+    else:
+        return False
 
 def updateItem(idNum: int, newItem: EditedItem):
     oldItem = getItem(idNum)
+    try:
+        if newItem.name in ("", None):
+            newItem.name = oldItem.name
+        if not newItem.price:
+            newItem.price = oldItem.price
+        if not newItem.quantity:
+            newItem.quantity = oldItem.quantity
+        if newItem.description in ("", None):
+            newItem.description = oldItem.description
 
-    if newItem.name in ("", None):
-        newItem.name = oldItem.name
-    if not newItem.price:
-        newItem.price = oldItem.price
-    if not newItem.quantity:
-        newItem.quantity = oldItem.quantity
-    if newItem.description in ("", None):
-        newItem.description = oldItem.description
-
+        query = update(items).where(items.c.id == idNum).values(id=idNum, name = newItem.name, price = newItem.price, quantity = newItem.quantity, description = newItem.description)
+        res = conn.execute(query)  
+        return "Item updated successfully"
+    except:
+        return False
     
-    
-    query = update(items).where(items.c.id == idNum).values(id=idNum, name = newItem.name, price = newItem.price, quantity = newItem.quantity, description = newItem.description)
-    res = conn.execute(query)
-    
-    return "200 OK"
