@@ -29,13 +29,13 @@ class db:
         res = conn.execute(query)
         return len(res.fetchall()) + 1
 
-def addItem(item: Item):
+def addItem(item: Item) -> Item:
     for i in range(1, db.getMaxId()):
         if db.checkId(i) == False:
             query = insert(items).values(id=i, name=item.name, price=item.price, quantity=item.quantity, description=item.description)
             try:
                 res = conn.execute(query)
-                return (item, "200 OK")
+                return (item)
             except:
                 return
         else:
