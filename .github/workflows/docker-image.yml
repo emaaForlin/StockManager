@@ -13,7 +13,7 @@ jobs:
     - id: string
       uses: ASzc/change-string-case-action@v1
       with:
-          string: ${{ github.repository }}
+          string: "${{ github.repository }}"
     - run: |
         echo "${{ steps.string.outputs.lowercase }}"
     
