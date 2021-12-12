@@ -10,7 +10,7 @@ jobs:
   bake:
     runs-on: ubuntu-latest
     steps:
-    - id: dockerRepo
+    - id: dockerRepoName
       uses: ASzc/change-string-case-action@v1
       with:
           string: "${{ github.repository }}"
@@ -28,3 +28,4 @@ jobs:
       uses: docker/bake-action@master
       with:
         push: true
+        tags: "${{ steps.dockerRepoName.outputs.lowercase }}:$(date + %s)"
