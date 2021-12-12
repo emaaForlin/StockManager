@@ -14,7 +14,7 @@ jobs:
       uses: ASzc/change-string-case-action@v1
       with:
           string: "${{ github.repository }}"
-      
+          
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag "${{ steps.string.outputs.lowercase }}:$(date + %s)"
+      run: docker build . --file Dockerfile --tag "${{ steps.string.outputs.lowercase }}:$(date +%s)"
