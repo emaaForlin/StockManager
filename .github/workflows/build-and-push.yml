@@ -24,16 +24,15 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         
-    - name: Calculate next version
-      uses: cezarypiatek/NextVersionGeneratorAction@0.4
+    - id: bump
+      uses: zwaldowski/match-label-action@v1
       with:
-        major-pattern: 'BREAKING CHANGES:'
-        minor-pattern: 'FEATURE:'
-        patch-pattern: '.*'
-        output-to-env-variable: 'VersionPrefix'
-    
-    - name: print version
-      run: echo "Build number is $VersionPrefix"
+        allowed: major,minor,patch
+    - uses: zwaldowski/semver-release-action@v1
+      id: version
+      with:
+        bump: ${{ steps.bump.outputs.match }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Build and push
       uses: docker/build-push-action@v2
