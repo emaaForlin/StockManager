@@ -16,6 +16,4 @@ jobs:
           string: ${{ github.repository }}
     - run: |
         echo "${{ steps.string.outputs.lowercase }}"
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ${{ github.repository.lowercase }}:$(date +%s)
+    
